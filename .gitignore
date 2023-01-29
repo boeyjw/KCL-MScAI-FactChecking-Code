@@ -161,3 +161,7 @@ cython_debug/
 
 # ignore data files
 data/
+
+# ignore databases and their configs
+db/
+.env
