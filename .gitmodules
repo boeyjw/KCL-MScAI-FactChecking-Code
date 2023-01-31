@@ -1,0 +1,3 @@
+[submodule "fact-check-transfer-learning-docs"]
+	path = fact-check-transfer-learning-docs
+	url = git@github.com:boeyjw/fact-check-transfer-learning-docs.git
