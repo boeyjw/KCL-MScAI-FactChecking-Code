@@ -164,4 +164,13 @@ data/
 
 # ignore databases and their configs
 db/
-.env
+
+# ignore pip offline packages
+pipreq.tar.gz
+pipreq/*
+
+# ignore slurm links to hpc scratch
+slurm/*
+slurm
+scratch/*
+scratch
