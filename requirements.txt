@@ -27,6 +27,7 @@ cymem==2.0.7
 debugpy==1.6.6
 decorator==5.1.1
 defusedxml==0.7.1
+en-core-web-lg @ file:///scratch/users/k21190024/fact-check-transfer-learning/en_core_web_lg-3.2.0-py3-none-any.whl
 executing==1.2.0
 fastjsonschema==2.16.2
 flatbuffers==20220426103649
@@ -148,6 +149,7 @@ terminado==0.17.1
 thinc==8.0.17
 threadpoolctl==3.1.0
 tinycss2==1.2.1
+tinydb==4.7.1
 tomli==2.0.1
 tornado==6.2
 tqdm==4.64.1
