@@ -17,9 +17,9 @@ readonly PORT=$(python -c 'import socket; s=socket.socket(); s.bind(("", 0)); pr
 cat 1>&2 <<END
 1. SSH tunnel from your workstation using the following command:
 
-   ssh -NL 8888:${HOSTNAME}:${PORT} ${USER}@hpc.create.kcl.ac.uk
+   ssh -NL 8889:${HOSTNAME}:${PORT} ${USER}@hpc.create.kcl.ac.uk
 
-   and point your web browser to http://localhost:8888/lab?token=<add the token from the jupyter output below>
+   and point your web browser to http://localhost:8889/lab?token=<add the token from the jupyter output below>
 
 Time started: ${DETAIL}
 
