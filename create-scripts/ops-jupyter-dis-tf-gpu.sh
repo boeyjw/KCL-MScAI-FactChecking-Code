@@ -5,7 +5,7 @@
 #SBATCH --signal=USR2
 #SBATCH --output=/scratch/users/%u/slurm-out/%j.out
 #SBATCH --gres=gpu
-#SBATCH --mem=20G
+#SBATCH --mem=40G
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-gpu=8
 

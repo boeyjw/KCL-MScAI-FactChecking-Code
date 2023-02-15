@@ -5,14 +5,11 @@
 #SBATCH --signal=USR2
 #SBATCH --output=/scratch/users/%u/slurm-out/%j.out
 #SBATCH --gres=gpu
-#SBATCH --mem=20G
+#SBATCH --mem=40G
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-gpu=8
 
-module load python/3.8.12-gcc-9.4.0
-module load cuda/11.4.2-gcc-9.4.0
-module load cudnn/8.2.4.15-11.4-gcc-10.3.0
-module load py-torch/1.11.0-gcc-9.4.0-openmpi-4.1.1-python-3.8.12
+module load anaconda3/2021.05-gcc-9.4.0
 
 # get unused socket per https://unix.stackexchange.com/a/132524
 readonly DETAIL=$(python -c 'import datetime; print(datetime.datetime.now())')
@@ -34,7 +31,8 @@ issuing the following command on the login node:
 
 END
 
-source /scratch/users/k21190024/envs/p-dis-torch/bin/activate
+source activate `which conda`
+source activate /scratch/users/k21190024/envs/conda/p-dis-torch
 jupyter-lab --port=${PORT} --ip=${IPADDRESS} --no-browser --notebook-dir=${HOME}/study/fact-check-transfer-learning
 
 printf 'notebook exited' 1>&2
