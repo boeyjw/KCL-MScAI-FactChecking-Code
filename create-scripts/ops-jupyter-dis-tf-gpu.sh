@@ -1,12 +1,13 @@
 #!/bin/bash -l
 
 #SBATCH --job-name=jupyter-tensorflow-pnn
-#SBATCH --partition=cpu
+#SBATCH --partition=gpu
 #SBATCH --signal=USR2
 #SBATCH --output=/scratch/users/%u/slurm-out/%j.out
-#SBATCH --mem=40G
+#SBATCH --gres=gpu
+#SBATCH --mem=20G
 #SBATCH --ntasks=1
-#SBATCH --mincpus=12
+#SBATCH --cpus-per-gpu=8
 
 module load python/3.8.12-gcc-9.4.0
 module load py-tensorflow/2.4.1-gcc-9.4.0-cuda-python-3.8.12
@@ -31,7 +32,7 @@ issuing the following command on the login node:
 
 END
 
-source /scratch/users/k21190024/envs/p-dis-gpu/bin/activate
+source /scratch/users/k21190024/envs/p-dis-tf/bin/activate
 jupyter-lab --port=${PORT} --ip=${IPADDRESS} --no-browser --notebook-dir=${HOME}/study/fact-check-transfer-learning
 
 printf 'notebook exited' 1>&2
