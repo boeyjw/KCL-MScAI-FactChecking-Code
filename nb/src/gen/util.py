@@ -10,16 +10,15 @@ def is_json_suffix(fp):
 def read_gzip_data(fp):
     fp = str(fp)
     with gzip.open(fp, "rb") as gzfn:
-        if is_json_suffix(fp):
-            try:
-                data = json.loads(gzfn.read())
-            except ValueError:
-                data = [json.loads(l.decode("utf8")) for l in gzfn.readlines()]
+        if ".jsonl" in os.path.basename(fp):
+            data = [json.loads(l.decode("utf8")) for l in gzfn.readlines()]
+        elif ".json" in os.path.basename(fp):
+            data = json.loads(gzfn.read())
         elif ".pkl.gz" in os.path.basename(fp):
             data = pkl.loads(gzfn.read())
         else:
             raise NotImplementedError(f"{os.path.basename(fp)} suffix is unsupported.")
-    return data if len(data) > 1 else data[0]
+    return data
 
 def write_gzip_data(fp, payload):
     fp = str(fp)

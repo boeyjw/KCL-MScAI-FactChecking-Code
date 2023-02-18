@@ -5,9 +5,10 @@
 #SBATCH --signal=USR2
 #SBATCH --output=/scratch/users/%u/slurm-out/%j.out
 #SBATCH --gres=gpu
-#SBATCH --mem=40G
+#SBATCH --mem=60G
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-gpu=8
+#SBATCH --cpus-per-gpu=4
+#SBATCH --gpus=1
 
 module load anaconda3/2021.05-gcc-9.4.0
 
