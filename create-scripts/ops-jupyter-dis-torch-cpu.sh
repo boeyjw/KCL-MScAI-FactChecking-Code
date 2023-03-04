@@ -1,10 +1,10 @@
 #!/bin/bash -l
 
-#SBATCH --job-name=jupyter-tensorflow-pnn
+#SBATCH --job-name=jdistorch
 #SBATCH --partition=cpu
 #SBATCH --signal=USR2
 #SBATCH --output=/scratch/users/%u/slurm-out/%j.out
-#SBATCH --mem=40G
+#SBATCH --mem=60G
 #SBATCH --ntasks=1
 #SBATCH --mincpus=12
 

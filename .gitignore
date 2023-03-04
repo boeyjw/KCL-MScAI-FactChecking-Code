@@ -174,3 +174,5 @@ slurm/*
 slurm
 scratch/*
 scratch
+repos
+repos/*

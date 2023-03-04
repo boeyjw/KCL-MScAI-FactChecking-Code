@@ -1,6 +1,6 @@
 #!/bin/bash -l
 
-#SBATCH --job-name=jupyter-tensorflow-pnn
+#SBATCH --job-name=jdistorch
 #SBATCH --partition=gpu
 #SBATCH --signal=USR2
 #SBATCH --output=/scratch/users/%u/slurm-out/%j.out
