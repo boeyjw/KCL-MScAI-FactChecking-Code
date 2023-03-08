@@ -7,17 +7,20 @@ def is_json_suffix(fp):
     fname = os.path.basename(fp)
     return ".json" in fname or ".jsonl" in fname
 
-def read_gzip_data(fp):
-    fp = str(fp)
-    with gzip.open(fp, "rb") as gzfn:
-        if ".jsonl" in os.path.basename(fp):
-            data = [json.loads(l.decode("utf8")) for l in gzfn.readlines()]
-        elif ".json" in os.path.basename(fp):
+def read_data(fp):
+    fn = gzip.open(fp, "rb") if fp.suffix == ".gz" else open(fp, "r")
+    fp_str = str(fp)
+    try:
+        if ".jsonl" in os.path.basename(fp_str):
+            data = [json.loads(l.decode("utf8") if fp.suffix == ".gz" else l) for l in fn.readlines()]
+        elif ".json" in os.path.basename(fp_str):
             data = json.loads(gzfn.read())
-        elif ".pkl.gz" in os.path.basename(fp):
+        elif ".pkl.gz" in os.path.basename(fp_str):
             data = pkl.loads(gzfn.read())
         else:
             raise NotImplementedError(f"{os.path.basename(fp)} suffix is unsupported.")
+    finally:
+        fn.close()
     return data
 
 def write_gzip_data(fp, payload):
