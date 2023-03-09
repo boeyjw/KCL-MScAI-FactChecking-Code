@@ -4,7 +4,7 @@ import pickle as pkl
 import os
 import csv
 
-def is_json_suffix(fp):
+def is_json_suffix(fp) -> str:
     fname = os.path.basename(fp)
     return ".json" in fname or ".jsonl" in fname
 

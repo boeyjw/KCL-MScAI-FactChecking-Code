@@ -11,6 +11,7 @@ def feverise_claims(data):
             "claim": doc["claim"], 
             "label": constants.LOOKUP["label"]["nei"], 
             "verifiable": constants.LOOKUP["verifiable"]["no"],
+            "elab": None, # store labels for each evidence
             "evidence": [] # [[[Annotation ID, Evidence ID, Wikipedia URL, sentence ID], ...]]
         }
         if doc["evidence"]:
@@ -20,6 +21,7 @@ def feverise_claims(data):
                     label_ls.append(i["label"])
                     for j in i["sentences"]:
                         evi_ls.append([None, None, str(eid), j])
+            fdoc["elab"] = label_ls
             fdoc["evidence"].append(evi_ls)
             if "CONTRADICT" in label_ls:
                 fdoc["label"] = constants.LOOKUP["label"]["r"]
