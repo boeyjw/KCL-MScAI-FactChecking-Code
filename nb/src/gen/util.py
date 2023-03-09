@@ -2,6 +2,7 @@ import gzip
 import json
 import pickle as pkl
 import os
+import csv
 
 def is_json_suffix(fp):
     fname = os.path.basename(fp)
@@ -30,4 +31,10 @@ def write_gzip_data(fp, payload):
             gzfn.write(json.dumps(payload).encode("utf-8"))
         elif ".pkl.gz" in os.path.basename(fp):
             gzfn.write(pkl.dumps(payload))
+    return fp
+
+def write_jsonl(fp, payload):
+    with open(fp, "w") as fn:
+        for doc in payload:
+            fn.writelines(json.dumps(doc, ensure_ascii=False) + "\n")
     return fp
