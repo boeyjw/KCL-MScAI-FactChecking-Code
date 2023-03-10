@@ -4,6 +4,10 @@ def feverise_claims(data):
     """
     Convert SciFact Claims to FEVER format
     """
+    sf_fever_label = {
+        "SUPPORT": constants.LOOKUP["label"]["s"],
+        "CONTRADICT": constants.LOOKUP["label"]["r"]
+    }
     fdata = []
     for doc in data:
         fdoc = {
@@ -18,15 +22,16 @@ def feverise_claims(data):
             label_ls, evi_ls = [], []
             for eid, es in doc["evidence"].items():
                 for i in es:
-                    label_ls.append(i["label"])
+                    # translate scifact label to fever label
+                    label_ls.append(sf_fever_label[i["label"]])
                     for j in i["sentences"]:
                         evi_ls.append([None, None, str(eid), j])
             fdoc["elab"] = label_ls
             fdoc["evidence"].append(evi_ls)
-            if "CONTRADICT" in label_ls:
+            if sf_fever_label["CONTRADICT"] in label_ls:
                 fdoc["label"] = constants.LOOKUP["label"]["r"]
                 fdoc["verifiable"] = constants.LOOKUP["verifiable"]["yes"]
-            elif "SUPPORT" in label_ls:
+            elif sf_fever_label["SUPPORT"] in label_ls:
                 fdoc["label"] = constants.LOOKUP["label"]["s"]
                 fdoc["verifiable"] = constants.LOOKUP["verifiable"]["yes"]
             # label only has 'NO INFO', keep default doc with evidence
