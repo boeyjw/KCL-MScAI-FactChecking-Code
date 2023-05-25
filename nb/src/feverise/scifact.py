@@ -22,9 +22,8 @@ def feverise_claims(data):
             label_ls, evi_ls = [], []
             for eid, es in doc["evidence"].items():
                 for i in es:
-                    # translate scifact label to fever label
-                    label_ls.append(sf_fever_label[i["label"]])
                     for j in i["sentences"]:
+                        label_ls.append(sf_fever_label[i["label"]])
                         evi_ls.append([None, None, str(eid), j])
             fdoc["elab"] = label_ls
             fdoc["evidence"].append(evi_ls)
@@ -44,10 +43,12 @@ def feverise_corpus(data):
     """
     Convert SciFact Corpus to FEVER format
     """
-    fdata = []
+    fdata_with_title = []
     for doc in data:
         fdoc = {
             "id": str(doc["doc_id"]),
+            "title": doc["title"],
+            "structured": doc["structured"],
             "text": None,
             "lines": None
         }
@@ -58,5 +59,7 @@ def feverise_corpus(data):
             tmp_l += f"{i}\t{line.strip()}\n"
         fdoc["text"] = tmp_t.strip()
         fdoc["lines"] = tmp_l.strip()
-        fdata.append(fdoc)
-    return fdata
+        
+        fdata_with_title.append(fdoc)
+        
+    return fdata_with_title

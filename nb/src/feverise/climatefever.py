@@ -115,20 +115,23 @@ def feverise_climatefever(data) -> tuple:
         evidence_ls, label_ls = [], []
         other_evidence_ls, other_label_ls = [], []
         for evidence in doc["evidences"]:
-            eid = evidence["evidence_id"].split(":")  # [id, sentence_id]
+            eid_tokens = evidence["evidence_id"].split(":")  # [id, sentence_id]
+            eid = "".join(eid_tokens[0:-1])  # evidence key
+            sid = int(eid_tokens[-1])  # sentence index
             # claims section
             if doc["claim_label"] not in ["NOT_ENOUGH_INFO", "DISPUTED"] and evidence["evidence_label"] == doc["claim_label"]:
-                evidence_ls.append([None, None, eid[0], eid[1]])
+                evidence_ls.append([None, None, eid, sid])
                 label_ls.append(cf_fever_labels[evidence["evidence_label"]])
             else:
                 # keep evidence and repective labels for evaluation purposes
-                other_evidence_ls.append([None, None, eid[0], eid[1]])
+                other_evidence_ls.append([None, None, eid, sid])
                 other_label_ls.append(cf_fever_labels[evidence["evidence_label"]])
             # corpus section
-            if eid[0] in corpus_d and eid[1] not in corpus_d[eid[0]]:
-                corpus_d[eid[0]][eid[1]] = evidence["evidence"]
+            if eid in corpus_d:
+                if sid not in corpus_d[eid]:
+                    corpus_d[eid][sid] = evidence["evidence"]
             else:
-                corpus_d[eid[0]] = {eid[1]: evidence["evidence"]}
+                corpus_d[eid] = {sid: evidence["evidence"]}
                 
         cdoc_assumed = _init_assumed_claim(doc)
         cdoc_paper = _init_paper_claim(doc)
