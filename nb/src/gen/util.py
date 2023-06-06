@@ -15,9 +15,9 @@ def read_data(fp):
         if ".jsonl" in os.path.basename(fp_str):
             data = [json.loads(l.decode("utf8") if fp.suffix == ".gz" else l) for l in fn.readlines()]
         elif ".json" in os.path.basename(fp_str):
-            data = json.loads(gzfn.read())
+            data = json.loads(fn.read())
         elif ".pkl.gz" in os.path.basename(fp_str):
-            data = pkl.loads(gzfn.read())
+            data = pkl.loads(fn.read())
         else:
             raise NotImplementedError(f"{os.path.basename(fp)} suffix is unsupported.")
     finally:

@@ -1,4 +1,4 @@
-from . import constants
+import constants
 
 def feverise_claims(data):
     """

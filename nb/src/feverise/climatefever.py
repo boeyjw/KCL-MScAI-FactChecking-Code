@@ -1,5 +1,5 @@
 from copy import deepcopy
-from . import constants
+import constants
 
 def _feverise_corpus(corpus_d):
     """
