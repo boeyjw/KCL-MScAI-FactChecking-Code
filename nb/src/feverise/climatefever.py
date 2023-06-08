@@ -1,5 +1,6 @@
 from copy import deepcopy
 import constants
+from feverise.util import denormalise_title
 
 def _feverise_corpus(corpus_d):
     """
@@ -21,6 +22,20 @@ def _feverise_corpus(corpus_d):
         cdoc["lines"].strip()
         corpus_ls.append(cdoc)
     return corpus_ls
+
+def feverise_corpus_titleid(feverise_data):
+    """
+    Rearrange Feverised Climate-FEVER corpus to use title as doc_id.
+    Required for pipelines and fully FEVER format compliant.
+    """
+    cf_titleid = []
+    for doc in feverise_data:
+        cdoc = deepcopy(doc)
+        cdoc["id"] = denormalise_title(doc["id"])
+        cdoc["original_id"] = doc["id"]
+        cf_titleid.append(cdoc)
+    
+    return cf_titleid
 
 def _init_assumed_claim(doc):
     """

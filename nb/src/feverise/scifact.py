@@ -1,4 +1,6 @@
+from copy import deepcopy
 import constants
+from feverise.util import denormalise_title
 
 def feverise_claims(data):
     """
@@ -63,3 +65,18 @@ def feverise_corpus(data):
         fdata_with_title.append(fdoc)
         
     return fdata_with_title
+
+def feverise_corpus_titleid(feverise_data):
+    """
+    Rearrange Feverised SciFact corpus to use title as doc_id.
+    Required for pipelines and fully FEVER format compliant.
+    """
+    sf_titleid = []
+    for doc in feverise_data:
+        fdoc = deepcopy(doc)
+        fdoc["id"] = denormalise_title(doc["title"])
+        fdoc["original_id"] = doc["id"]
+        del fdoc["title"]
+        sf_titleid.append(fdoc)
+    
+    return sf_titleid
