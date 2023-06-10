@@ -77,9 +77,9 @@ def _init_paper_claim(doc):
         "claim": doc["claim"],
         "label": None,
         "elab": None,  # evidence labels
-        "evidence": [],  # evidences
+        "evidence": None,  # evidences
         "other_elab": None,  # NEI claim label evidence labels
-        "other_evidence": []  # NEI claim label evidences
+        "other_evidence": None  # NEI claim label evidences
     }
     if doc["claim_label"] == "NOT_ENOUGH_INFO":
         cdoc["verifiable"] = constants.LOOKUP["verifiable"]["no"]
@@ -106,15 +106,15 @@ def feverise_climatefever(data) -> tuple:
         # add evidence and evidence labels
         if doc["claim_label"] in ["NOT_ENOUGH_INFO", "DISPUTED"]:
             # FEVER claims with NOT ENOUGH INFO do not have evidences
-            cdoc["evidence"].append([[None]*4])
+            cdoc["evidence"] = [[[None]*4]]
             if doc["claim_label"] == "DISPUTED" and "is_disputed" in cdoc:
                 cdoc["is_disputed"] = True
         else:
-            cdoc["evidence"].append(evidence_ls)
+            cdoc["evidence"] = evidence_ls
             cdoc["elab"] = label_ls
 
         if other_evidence_ls:
-            cdoc["other_evidence"].append(other_evidence_ls)
+            cdoc["other_evidence"] = other_evidence_ls
             cdoc["other_elab"] = other_label_ls
             
     cf_fever_labels = {
@@ -135,11 +135,11 @@ def feverise_climatefever(data) -> tuple:
             sid = int(eid_tokens[-1])  # sentence index
             # claims section
             if doc["claim_label"] not in ["NOT_ENOUGH_INFO", "DISPUTED"] and evidence["evidence_label"] == doc["claim_label"]:
-                evidence_ls.append([None, None, eid, sid])
+                evidence_ls.append([[None, None, eid, sid]])
                 label_ls.append(cf_fever_labels[evidence["evidence_label"]])
             else:
-                # keep evidence and repective labels for evaluation purposes
-                other_evidence_ls.append([None, None, eid, sid])
+                # keep evidence and respective labels for evaluation purposes
+                other_evidence_ls.append([[None, None, eid, sid]])
                 other_label_ls.append(cf_fever_labels[evidence["evidence_label"]])
             # corpus section
             if eid in corpus_d:

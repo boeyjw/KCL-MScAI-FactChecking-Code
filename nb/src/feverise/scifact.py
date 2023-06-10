@@ -18,7 +18,7 @@ def feverise_claims(data):
             "label": constants.LOOKUP["label"]["nei"], 
             "verifiable": constants.LOOKUP["verifiable"]["no"],
             "elab": None, # store labels for each evidence
-            "evidence": [] # [[[Annotation ID, Evidence ID, Wikipedia URL, sentence ID], ...]]
+            "evidence": None # [[[Annotation ID, Evidence ID, Wikipedia URL, sentence ID], ...]]
         }
         if doc["evidence"]:
             label_ls, evi_ls = [], []
@@ -26,9 +26,9 @@ def feverise_claims(data):
                 for i in es:
                     for j in i["sentences"]:
                         label_ls.append(sf_fever_label[i["label"]])
-                        evi_ls.append([None, None, str(eid), j])
+                        evi_ls.append([[None, None, str(eid), j]])
             fdoc["elab"] = label_ls
-            fdoc["evidence"].append(evi_ls)
+            fdoc["evidence"] = evi_ls
             if sf_fever_label["CONTRADICT"] in label_ls:
                 fdoc["label"] = constants.LOOKUP["label"]["r"]
                 fdoc["verifiable"] = constants.LOOKUP["verifiable"]["yes"]
@@ -37,8 +37,9 @@ def feverise_claims(data):
                 fdoc["verifiable"] = constants.LOOKUP["verifiable"]["yes"]
             # label only has 'NO INFO', keep default doc with evidence
         else:
-            fdoc["evidence"].append([[None, None, None, None]])
+            fdoc["evidence"] = [[[None]*4]]
         fdata.append(fdoc)
+        
     return fdata
 
 def feverise_corpus(data):
@@ -56,7 +57,6 @@ def feverise_corpus(data):
         }
         tmp_l, tmp_t = "", ""
         for i, line in enumerate(doc["abstract"]):
-            # No tags, possible WIP?
             tmp_t += f"{line.strip()} "
             tmp_l += f"{i}\t{line.strip()}\n"
         fdoc["text"] = tmp_t.strip()
