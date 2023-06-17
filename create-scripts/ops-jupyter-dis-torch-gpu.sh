@@ -9,6 +9,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-gpu=4
 #SBATCH --gpus=1
+#SBATCH --exclude=erc-hpc-vm0[11-16]
 
 module load anaconda3/2021.05-gcc-9.4.0
 
