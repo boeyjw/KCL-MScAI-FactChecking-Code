@@ -1,4 +1,6 @@
 from copy import deepcopy
+from collections import defaultdict
+
 import constants
 from feverise.util import denormalise_title
 
@@ -6,36 +8,26 @@ def _feverise_corpus(corpus_d):
     """
     Process corpus
     """
-    corpus_ls = []
+    corpus_ls = []  # corpus dictionary
+    corpus_line_translate = defaultdict(dict)  # translate corpus line id to start from 0 and increase by 1
     for cid, sentences in corpus_d.items():
         cdoc = {
             "id": cid,
             "text": "",
             "lines": []
         }
-        for sid, l in sorted(sentences.items()):
+        for inc, (sid, l) in enumerate(sorted(sentences.items())):
             cdoc["text"] += l + " "
-            cdoc["lines"].append(f"{sid}\t{l}")
+            # cdoc["lines"].append(f"{sid}\t{l}")
+            cdoc["lines"].append(f"{inc}\t{l}")
+            corpus_line_translate[cid][sid] = inc
         cdoc["lines"] = "\n".join(cdoc["lines"])
         
         cdoc["text"].strip()
         cdoc["lines"].strip()
         corpus_ls.append(cdoc)
-    return corpus_ls
-
-def feverise_corpus_titleid(feverise_data):
-    """
-    Rearrange Feverised Climate-FEVER corpus to use title as doc_id.
-    Required for pipelines and fully FEVER format compliant.
-    """
-    cf_titleid = []
-    for doc in feverise_data:
-        cdoc = deepcopy(doc)
-        cdoc["id"] = denormalise_title(doc["id"])
-        cdoc["original_id"] = doc["id"]
-        cf_titleid.append(cdoc)
-    
-    return cf_titleid
+        
+    return corpus_ls, corpus_line_translate
 
 def _init_assumed_claim(doc):
     """
@@ -91,6 +83,24 @@ def _init_paper_claim(doc):
         cdoc["label"] = constants.LOOKUP["label"]["s"] if doc["claim_label"] == "SUPPORTS" else constants.LOOKUP["label"]["r"]
     
     return cdoc
+
+def _translate_evidence_line_id(doc, translator):
+    def generate(key):
+        new_evidence_lineid = []
+        for evidence in doc[key]:
+            if evidence[0][-1] is None:
+                new_evidence_lineid.append(evidence)
+            else:
+                eid = evidence[0][2]
+                old_sid = evidence[0][3]
+                new_evidence_lineid.append([[None, None, eid, translator[eid][old_sid]]])
+        return new_evidence_lineid
+    
+    doc["evidence"] = generate("evidence")
+    if doc["other_evidence"] is not None:
+        doc["other_evidence"] = generate("other_evidence")
+    
+    return doc
 
 def feverise_climatefever(data) -> tuple:
     """
@@ -159,6 +169,24 @@ def feverise_climatefever(data) -> tuple:
             paper_ls.append(cdoc_paper)
             
     # process corpus
-    corpus_ls = _feverise_corpus(corpus_d)
+    corpus_ls, corpus_line_translate = _feverise_corpus(corpus_d)
     
-    return paper_ls, assumed_ls, corpus_ls
+    # reindex line id
+    paper_ls = [_translate_evidence_line_id(doc, corpus_line_translate) for doc in paper_ls]
+    assumed_ls = [_translate_evidence_line_id(doc, corpus_line_translate) for doc in assumed_ls]
+    
+    return paper_ls, assumed_ls, corpus_ls, corpus_line_translate
+
+def feverise_corpus_titleid(feverise_data):
+    """
+    Rearrange Feverised Climate-FEVER corpus to use title as doc_id.
+    Required for pipelines and fully FEVER format compliant.
+    """
+    cf_titleid = []
+    for doc in feverise_data:
+        cdoc = deepcopy(doc)
+        cdoc["id"] = denormalise_title(doc["id"])
+        cdoc["original_id"] = doc["id"]
+        cf_titleid.append(cdoc)
+    
+    return cf_titleid

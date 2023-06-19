@@ -5,18 +5,6 @@ from collections import defaultdict
 def denormalise_title(s):
     return s.replace(" ", "_").replace("(", "-LRB-").replace(")", "-RRB-").replace(":", "-COLON-").strip(".")
 
-def count_evidences(claims):
-    n_evidences = defaultdict(list)
-    for d in claims:
-        n_evidences[d["label"]].append(0)
-        for i in d["evidence"]:
-            n_evidences[d["label"]][-1] += len(i)
-        if "other_evidence" in d and d["other_evidence"] is not None:
-            for i in d["other_evidence"]:
-                n_evidences[d["label"]][-1] += len(i)
-    
-    return n_evidences
-
 def replace_id_with_titleid(db_path, doc):
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
