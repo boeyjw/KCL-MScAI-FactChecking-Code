@@ -1,0 +1,7 @@
+Baseline
+/scratch/users/k21190024/envs/conda/fever-baseline/lib/python3.6/site-packages/allennlp/models/decomposable_attention.py - Modify to track micro and macro F1 metric
+
+/users/k21190024/study/fact-checking-repos/fever/baseline/src/rte/parikh/reader.py - Modify to make it compatible with allennlp 0.9.0
+
+/users/k21190024/study/fact-checking-repos/fever/baseline/src/scripts/rte/da/eval_da.py - Modify to make it compatible with allennlp 0.9.0
+
