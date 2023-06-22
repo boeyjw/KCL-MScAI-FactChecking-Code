@@ -38,9 +38,30 @@ class FEVERScorer:
         self._max_evidence = max_evidence
         self._score_name = score_name
         
-        _predicted_sentences = [[[ev[0][2], ev[0][3]] for ev in doc["evidence"]] for doc in actual_data] if self._oracle_ir else [doc["predicted_sentences"] for doc in prediction_data]
-        _predicted_pages = [list(set([ev[0][2] for ev in doc["evidence"] if ev[0][2] is not None])) for doc in actual_data] if self._oracle_ir else [list(set(doc["predicted_pages"])) for doc in prediction_data]
-        _predicted_labels = [doc["label"] for doc in actual_data] if self._oracle_rte else [doc["predicted"] for doc in prediction_data]
+        if self._oracle_ir:
+            _predicted_sentences = [[[ev[0][2], ev[0][3]] for ev in doc["evidence"]] for doc in actual_data]
+            _predicted_pages = [list(set([ev[0][2] for ev in doc["evidence"] if ev[0][2] is not None])) for doc in actual_data]
+        else:
+            if "predicted_sentences" in prediction_data[0]:
+                _predicted_sentences = [doc["predicted_sentences"] for doc in prediction_data]
+            else:
+                _predicted_sentences = [doc["predicted_evidence"] for doc in prediction_data]
+
+            if "predicted_pages" in prediction_data[0]:
+                _predicted_pages = [list(set(doc["predicted_pages"])) for doc in prediction_data]
+            else:
+                _predicted_pages = []
+                for sents in _predicted_sentences:
+                    _predicted_pages.append(list(set([p[0] for p in sents])))
+        
+        if self._oracle_rte:
+            _predicted_labels = [doc["label"] for doc in actual_data]
+        else:
+            if "predicted_label" in prediction_data[0]:
+                _predicted_labels = [doc["predicted_label"] for doc in prediction_data]
+            else:
+                _predicted_labels = [doc["predicted"] for doc in prediction_data]
+                
         self.predictions = [{"predicted_evidence": evidence, "predicted_pages": pages, "predicted_label": label} for evidence, pages, label in zip(_predicted_sentences, _predicted_pages, _predicted_labels)]
         
         self.fever_score, self.accuracy, self.precision, self.recall, self.f1 = self.fever_score(self.predictions, actual_data, self._max_evidence)
