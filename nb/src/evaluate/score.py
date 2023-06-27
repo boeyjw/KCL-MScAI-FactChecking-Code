@@ -291,7 +291,7 @@ class FEVERScorer:
                 "claim_id": actual[idx]["id"],
                 "claim_label": actual[idx]["label"],
                 "n_predicted_evidences": len(instance["predicted_evidence"]),
-                "n_total_evidences": len(instance["evidence"])
+                "n_total_evidences": len([e[2] for eg in instance["evidence"] for e in eg if e[3] is not None])
             }
             
             # full hit
@@ -309,6 +309,24 @@ class FEVERScorer:
             match_matrix.append(match_d)
         
         return match_matrix
+    
+    def get_document_metric(self, match_matrix = None, return_df: bool = False):
+        """
+        Get document accuracy, macro recall and macro precision
+        """
+        df_mm = pd.DataFrame(self.match_matrix if match_matrix is None else match_metrix)
+        df_mm["_tp"] = df_mm[["evidence_page", "predicted_page"]].apply(lambda x: x[0] & x[1], axis=1).apply(len)
+        # df_mm["doc_accuracy"] = df_mm["_tp"] / df_mm[["evidence_page", "predicted_page"]].apply(lambda x: x[0] | x[1], axis=1).apply(len)
+        df_mm["doc_recall"] = df_mm["_tp"] / df_mm["evidence_page"].apply(len)
+        df_mm["doc_precision"] = df_mm["_tp"] / df_mm["predicted_page"].apply(len)
+        
+        metrics = {
+            # "accuracy": df_mm.loc[df_mm["claim_label"] != "NOT ENOUGH INFO", "doc_accuracy"].mean(), 
+            "recall": df_mm.loc[df_mm["claim_label"] != "NOT ENOUGH INFO", "doc_recall"].mean(), 
+            "precision": df_mm.loc[df_mm["claim_label"] != "NOT ENOUGH INFO", "doc_precision"].mean()
+        }
+        
+        return (metrics, df_mm) if return_df else metrics
 
 
 class ClimateFEVERScorer(FEVERScorer):
@@ -441,7 +459,7 @@ class ClimateFEVERScorer(FEVERScorer):
                 "claim": actual[idx]["claim"],
                 "claim_label": actual[idx]["label"],
                 "n_predicted_evidences": len(instance["predicted_evidence"]),
-                "n_total_evidences": len(instance["evidence"])
+                "n_total_evidences": len([e[2] for eg in instance["evidence"] for e in eg if e[3] is not None])
             }
             
             # full hit
@@ -464,3 +482,21 @@ class ClimateFEVERScorer(FEVERScorer):
             match_matrix.append(match_d)
         
         return match_matrix
+    
+    def get_document_metric(self, match_matrix = None, return_df: bool = False):
+        """
+        Get document accuracy, macro recall and macro precision
+        """
+        df_mm = pd.DataFrame(self.match_matrix if match_matrix is None else match_metrix)
+        df_mm["_tp"] = df_mm[["evidence_page", "predicted_page"]].apply(lambda x: x[0] & x[1], axis=1).apply(len)
+        # df_mm["doc_accuracy"] = df_mm["_tp"] / df_mm[["evidence_page", "predicted_page"]].apply(lambda x: x[0] | x[1], axis=1).apply(len)
+        df_mm["doc_recall"] = df_mm["_tp"] / df_mm["evidence_page"].apply(len)
+        df_mm["doc_precision"] = df_mm["_tp"] / df_mm["predicted_page"].apply(len)
+        
+        metrics = {
+            # "accuracy": df_mm["doc_accuracy"].mean(), 
+            "recall": df_mm["doc_recall"].mean(), 
+            "precision": df_mm["doc_precision"].mean()
+        }
+        
+        return (metrics, df_mm) if return_df else metrics
