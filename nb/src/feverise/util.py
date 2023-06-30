@@ -2,9 +2,6 @@ import sqlite3
 from copy import deepcopy
 from collections import defaultdict
 
-def denormalise_title(s):
-    return s.replace(" ", "_").replace("(", "-LRB-").replace(")", "-RRB-").replace(":", "-COLON-").strip(".")
-
 def replace_id_with_titleid(db_path, doc):
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()

@@ -83,13 +83,17 @@ class FEVERScorer:
             """
     
     def score_to_dict(self):
+        doc_metric = self.get_document_metric()
         key_prefix = "{0}_{1}" if len(self._score_name) > 0 else "{0}{1}"
         return {
             key_prefix.format(self._score_name, "fever_score"): self.fever_score,
-            key_prefix.format(self._score_name, "accuracy"): self.accuracy,
-            key_prefix.format(self._score_name, "precision"): self.precision,
-            key_prefix.format(self._score_name, "recall"): self.recall,
-            key_prefix.format(self._score_name, "f1"): self.f1,
+            key_prefix.format(self._score_name, "evidence_accuracy"): self.accuracy,
+            key_prefix.format(self._score_name, "evidence_precision"): self.precision,
+            key_prefix.format(self._score_name, "evidence_recall"): self.recall,
+            key_prefix.format(self._score_name, "evidence_f1"): self.f1,
+            key_prefix.format(self._score_name, "document_precision"): doc_metric["precision"],
+            key_prefix.format(self._score_name, "document_recall"): doc_metric["recall"],
+            key_prefix.format(self._score_name, "document_f1"): doc_metric["f1"],
         }
 
     def check_predicted_evidence_format(self, instance):
@@ -325,6 +329,7 @@ class FEVERScorer:
             "recall": df_mm.loc[df_mm["claim_label"] != "NOT ENOUGH INFO", "doc_recall"].mean(), 
             "precision": df_mm.loc[df_mm["claim_label"] != "NOT ENOUGH INFO", "doc_precision"].mean()
         }
+        metrics["f1"] = 2.0 * metrics["precision"] * metrics["recall"] / (metrics["precision"] + metrics["recall"])
         
         return (metrics, df_mm) if return_df else metrics
 
@@ -498,5 +503,6 @@ class ClimateFEVERScorer(FEVERScorer):
             "recall": df_mm["doc_recall"].mean(), 
             "precision": df_mm["doc_precision"].mean()
         }
+        metrics["f1"] = 2.0 * metrics["precision"] * metrics["recall"] / (metrics["precision"] + metrics["recall"])
         
         return (metrics, df_mm) if return_df else metrics

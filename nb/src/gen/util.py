@@ -3,6 +3,7 @@ import json
 import pickle as pkl
 import os
 import csv
+import unicodedata
 
 def is_json_suffix(fp) -> str:
     fname = os.path.basename(fp)
@@ -38,3 +39,17 @@ def write_jsonl(fp, payload):
         for doc in payload:
             fn.writelines(json.dumps(doc, ensure_ascii=False) + "\n")
     return fp
+
+def normalize(text):
+    """
+    Resolve different type of unicode encodings.
+    
+    Reference: https://github.com/facebookresearch/DrQA/blob/main/drqa/retriever/utils.py
+    """
+    return unicodedata.normalize('NFD', text)
+
+def denormalise_title(s):
+    return s.replace(" ", "_").replace("(", "-LRB-").replace(")", "-RRB-").replace(":", "-COLON-").strip(".")
+
+def normalise_title(s):
+    return s.replace("_", " ").replace("-LRB-", "(").replace("-RRB-", ")").replace("-COLON-", ":").strip(".")

@@ -2,7 +2,7 @@ from copy import deepcopy
 from collections import defaultdict
 
 import constants
-from feverise.util import denormalise_title
+from gen.util import denormalise_title
 
 def _feverise_corpus(corpus_d):
     """

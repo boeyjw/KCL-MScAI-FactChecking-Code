@@ -1,6 +1,6 @@
 from copy import deepcopy
 import constants
-from feverise.util import denormalise_title
+from gen.util import denormalise_title
 
 def feverise_claims(data):
     """
