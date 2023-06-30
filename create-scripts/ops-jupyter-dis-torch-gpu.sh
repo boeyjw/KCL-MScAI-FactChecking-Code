@@ -10,8 +10,10 @@
 #SBATCH --cpus-per-gpu=4
 #SBATCH --gpus=1
 #SBATCH --exclude=erc-hpc-vm0[11-16]
+#SBATCH --time=1-23:59
 
 module load anaconda3/2021.05-gcc-9.4.0
+module load openjdk/11.0.12_7-gcc-9.4.0
 
 # get unused socket per https://unix.stackexchange.com/a/132524
 readonly DETAIL=$(python -c 'import datetime; print(datetime.datetime.now())')

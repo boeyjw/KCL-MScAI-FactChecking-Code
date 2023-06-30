@@ -7,8 +7,10 @@
 #SBATCH --mem=60G
 #SBATCH --ntasks=1
 #SBATCH --mincpus=12
+#SBATCH --time=1-01:00
 
 module load anaconda3/2021.05-gcc-9.4.0
+module load openjdk/1.8.0_265-b01-gcc-9.4.0
 
 # get unused socket per https://unix.stackexchange.com/a/132524
 readonly DETAIL=$(python -c 'import datetime; print(datetime.datetime.now())')
