@@ -1,5 +1,6 @@
 from pathlib import Path
 from copy import deepcopy
+from tqdm import tqdm
 
 from pyserini.search.lucene import LuceneSearcher
 
@@ -20,7 +21,7 @@ class Retriever(object):
     
     def to_jsonl(self, out_path, overwrite: bool = False):
         out_path = Path(out_path)
-        if out_path.exist() and not overwrite:
+        if out_path.exists() and not overwrite:
             raise FileExistsError("Result file {0} exists! Switch overwrite to True to replace file.".format(out_path))
         util.write_jsonl(out_path, self.results)
     
@@ -28,12 +29,12 @@ class Retriever(object):
 class BM25DocumentRetriever(Retriever):
     def __init__(
         self, data_path, db_path, pyserini_index_name, 
-        bm25_top_k: int = 100, n_jobs: int = 1
+        bm25_top_k: int = 10, n_jobs: int = 1
     ):
         super().__init__(data_path, db_path)
         self.results = []
         self.bm25_searcher = LuceneSearcher.from_prebuilt_index(pyserini_index_name)
-        self.bm25_searcher.set_bm25()
+        self.bm25_searcher.set_bm25(k1=float(0.9), b=float(0.4))
         
         self.bm25_top_k = bm25_top_k
         self.n_jobs = n_jobs
@@ -46,16 +47,17 @@ class BM25DocumentRetriever(Retriever):
         
         # retrieve documents
         retrieved_docs = self.bm25_searcher.batch_search(q, qids=qids, k=self.bm25_top_k, threads=self.n_jobs)
-        # check if document is available in database
-        retrieved_docs = {
-            k: [[i.docid, float(i.score), self._check_docid_exist(i.docid)] for i in v] 
-            for k, v in retrieved_docs.items()
-        }
         # update the data
-        for doc in self.data:
+        for doc in tqdm(self.data):
             retr_doc = deepcopy(doc)
-            retr_doc["predicted_pages_score"] = retrieved_docs[str(doc["id"])]
-            # only add pages that exist in the db as predicted pages
-            retr_doc["predicted_pages"] = [i[0] for i in retrieved_docs[str(doc["id"])] if i[2]]
+            retr_doc["predicted_pages_score"] = []
+            retr_doc["predicted_pages"] = []
+            for hit in retrieved_docs[str(doc["id"])]:
+                # already sorted in descending score
+                retr_doc["predicted_pages_score"].append([hit.docid, hit.score])
+                # only add database pages into result set
+                if self._check_docid_exist(hit.docid):
+                    retr_doc["predicted_pages"].append(hit.docid)
             self.results.append(retr_doc)
+
         

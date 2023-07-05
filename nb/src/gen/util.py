@@ -49,7 +49,7 @@ def normalize(text):
     return unicodedata.normalize('NFD', text)
 
 def denormalise_title(s):
-    return s.replace(" ", "_").replace("(", "-LRB-").replace(")", "-RRB-").replace(":", "-COLON-").strip(".")
+    return s.replace(" ", "_").replace("(", "-LRB-").replace(")", "-RRB-").replace(":", "-COLON-")
 
 def normalise_title(s):
-    return s.replace("_", " ").replace("-LRB-", "(").replace("-RRB-", ")").replace("-COLON-", ":").strip(".")
+    return s.replace("_", " ").replace("-LRB-", "(").replace("-RRB-", ")").replace("-COLON-", ":").replace("-LSB-", "[").replace("-RSB-", "]")

@@ -22,3 +22,15 @@ def count_evidences(claims):
     stats = {k: _count_statistics(cnt) for k, cnt in n_evidences.items()}
     
     return n_evidences, stats
+
+def max_sentence_effect(counter, max_sents: int):
+    res = {}
+    for s in range(1, max_sents+1):
+        less, more = 0, 0
+        for n, cnt in counter.items():
+            if n > s:
+                more += cnt
+            else:
+                less += cnt
+        res[s] = (more / (more + less))
+    return res

@@ -47,7 +47,10 @@ class FEVERScorer:
         self.predictions = [{"predicted_evidence": evidence, "predicted_pages": pages, "predicted_label": label} for evidence, pages, label in zip(_predicted_sentences, _predicted_pages, _predicted_labels)]
         
         self.fever_score, self.accuracy, self.precision, self.recall, self.f1 = self.fever_score(self.predictions, actual_data, self._max_evidence)
-        self.match_matrix = self.evidence_match_matrix(self.predictions, actual_data)
+        
+        self.match_matrix = None
+        if not oracle_ir:
+            self.match_matrix = self.evidence_match_matrix(self.predictions, actual_data)
         
         self.classification_report = None
         self.rte_metrics = None
