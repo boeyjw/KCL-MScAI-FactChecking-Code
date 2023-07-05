@@ -1,6 +1,6 @@
 #!/bin/bash -l
 
-#SBATCH --job-name=baseline-ir-5
+#SBATCH --job-name=baseline-ir-6
 #SBATCH --partition=cpu
 #SBATCH --signal=USR2
 #SBATCH --output=/scratch/users/%u/slurm-out/%j.out

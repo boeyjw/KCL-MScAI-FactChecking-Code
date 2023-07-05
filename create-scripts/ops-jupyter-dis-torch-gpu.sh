@@ -15,6 +15,7 @@
 module load anaconda3/2021.05-gcc-9.4.0
 module load openjdk/11.0.12_7-gcc-9.4.0
 
+# can use erc-hpc-comp0[38,39]
 # get unused socket per https://unix.stackexchange.com/a/132524
 readonly DETAIL=$(python -c 'import datetime; print(datetime.datetime.now())')
 readonly IPADDRESS=$(hostname -I | tr ' ' '\n' | grep '10.211.4.')
