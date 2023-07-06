@@ -2,6 +2,7 @@ import json
 import six
 from pathlib import Path
 from collections import defaultdict
+from dataclasses  import dataclass
 
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -56,7 +57,8 @@ class FEVERScorer:
         self.rte_metrics = None
         if not oracle_rte:
             actual_labels = [doc["label"] for doc in actual_data]
-            self.classification_report = classification_report(y_true=actual_labels, y_pred=_predicted_labels)
+            self.classification_report = classification_report(y_true=actual_labels, y_pred=_predicted_labels, digits=4)
+            self.classification_report_dict = classification_report(y_true=actual_labels, y_pred=_predicted_labels, output_dict=True)
             mi_p, mi_r, mi_f, _ = precision_recall_fscore_support(y_true=actual_labels, y_pred=_predicted_labels, average="micro", beta=1.0)
             ma_p, ma_r, ma_f, _ = precision_recall_fscore_support(y_true=actual_labels, y_pred=_predicted_labels, average="macro", beta=1.0)
             self.rte_metrics = {
@@ -509,3 +511,14 @@ class ClimateFEVERScorer(FEVERScorer):
         metrics["f1"] = 2.0 * metrics["precision"] * metrics["recall"] / (metrics["precision"] + metrics["recall"])
         
         return (metrics, df_mm) if return_df else metrics
+    
+@dataclass
+class SentenceMicroScorer:
+    _score_name: str
+    classification_report: str
+    classification_report_dict: dict
+    rte_metrics: dict
+    
+    def print_report(self):
+        print(self._score_name)
+        print(self.classification_report)

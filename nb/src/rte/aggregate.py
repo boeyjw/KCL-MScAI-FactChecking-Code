@@ -7,10 +7,27 @@ from scipy.special import softmax
 
 ID2LABEL = {0: "SUPPORTS", 1: "NOT ENOUGH INFO", 2: "REFUTES"}
 
-def agg_predict_proba(probas):
-    return np.argmax(np.array(probas).mean())
+def agg_predict_proba(proba):
+    """
+    Mean softmax probability across labels. Returns the label
+    with the highest probability. If labels have equal probability,
+    return the first one in the order of SUPPORTS, NOT ENOUGH INFO, REFUTES
+    """
+    probas = np.array([pr for pr in proba])
+    return np.argmax(probas.mean(axis=0))
 
 def agg_predict(preds):
+    """
+    Climate-FEVER style majority aggregation
+    SUPPORTS if evidence only contain SUPPORTS and NOT ENOUGH INFO
+    REFUTES  if evidence only contain REFUTES and NOT ENOUGH INFO
+    NOT ENOUGH INFO if evidence only contain NOT ENOUGH INFO
+    
+    If evidence contain both SUPPORT and REFUTES, then the majority
+    label is taken as final label.
+    If evidence contain both SUPPORT and REFUTES in equal numbers,
+    then return NOT ENOUGH INFO
+    """
     preds = preds.values
     if 0 in preds and 2 in preds:
         cnt = Counter(preds)
@@ -35,6 +52,7 @@ def generate_micro_macro_df(actual, preds):
         "predicted": [np.argmax(logit) for logit in preds.predictions],
         "proba": [proba for proba in softmax(preds.predictions, axis=1)]
     })
+    # FIXME: For climate-fever, this aggregation is wrong for actual data
     df_macro_preds = (
         df_micro_preds
         .groupby("claim")
