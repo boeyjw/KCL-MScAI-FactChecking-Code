@@ -9,11 +9,12 @@ import constants
 from retrieval.fever_doc_db import FeverDocDB
 from gen import util
 
-def prepare_doc(doc, db_path, sentence_pair: bool, cross_encoder_name: str, max_evidence: int, nei_max_evidence: int):
+def prepare_doc(doc, db_path, sentence_pair: bool, cross_encoder_name: str, max_evidence: int, nei_max_evidence: int, id_prefix: str):
     db = FeverDocDB(db_path)
     sentences = []
+    elab = []
     sent_line = []
-    for ev in doc["evidence"]:
+    for i, ev in enumerate(doc["evidence"]):
         e = ev[0]
         if e[2] is not None:
             # handle duplicate evidence
@@ -29,6 +30,8 @@ def prepare_doc(doc, db_path, sentence_pair: bool, cross_encoder_name: str, max_
                     # handle dirty evidence lines in db
                     if l[0].isdigit() and l[1].strip() and int(l[0]) == int(e[3]):
                         sentences.append(util.normalise_title(l[1]))
+                        if "elab" in doc:
+                            elab.append(doc["elab"][i] if doc["elab"] else doc["label"])
     
     # limit number of evidences and retrieve only closest evidence to prevent major skew in target distribution
     if len(sentences) > max_evidence:
@@ -41,9 +44,31 @@ def prepare_doc(doc, db_path, sentence_pair: bool, cross_encoder_name: str, max_
         sentences = sentences[:nei_max_evidence]
     
     if sentence_pair:
-        return [{"claim": doc["claim"], "evidence": s, "labels": constants.LABEL2ID[doc["label"]]} for s in sentences]
+        if "elab" in doc:
+            return [
+                {
+                    "claim": doc["claim"], 
+                    "evidence": s, 
+                    "labels": constants.LABEL2ID[el], 
+                    "claim_id": f"{id_prefix}|{doc['id']}"
+                } for el, s in zip(elab, sentences)
+            ]
+        else:
+            return [
+                {
+                    "claim": doc["claim"], 
+                    "evidence": s, 
+                    "labels": constants.LABEL2ID[doc["label"]], 
+                    "claim_id": f"{id_prefix}|{doc['id']}"
+                } for s in sentences
+            ]
     else:
-        return {"claim": doc["claim"], "evidence": " ".join(sentences), "labels": constants.LABEL2ID[doc["label"]]}
+        return {
+            "claim": doc["claim"], 
+            "evidence": " ".join(sentences), 
+            "labels": constants.LABEL2ID[doc["label"]], 
+            "claim_id": f"{id_prefix}|{doc['id']}"
+        }
 
 
 if __name__ == "__main__":
@@ -54,8 +79,8 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--n-jobs", type=int, default=1, help="Number of workers to run")
     parser.add_argument("--sentence-pair", action="store_true", help="Return as claim-evidence sentence pair")
     parser.add_argument("-c", "--cross-encoder-name", type=str, default="cross-encoder/ms-marco-MiniLM-L-6-v2", help="SentenceTransformer Cross-Encoder to use for sentence retrieval ranking.")
-    parser.add_argument("--max-evidence", type=int, default=99, help="Maximum number of evidence to use")
-    parser.add_argument("--nei-max-evidence", type=int, default=99, help="Maximum number of NEI claim-evidence to use")
+    parser.add_argument("--max-evidence", type=int, default=99999, help="Maximum number of evidence to use")
+    parser.add_argument("--nei-max-evidence", type=int, default=99999, help="Maximum number of NEI claim-evidence to use")
     
     args = parser.parse_args()
     
@@ -64,7 +89,7 @@ if __name__ == "__main__":
     
     print("Start processing...")
     datain = util.read_data(infile)
-    res = Parallel(n_jobs=args.n_jobs)(delayed(prepare_doc)(doc, args.db_path, args.sentence_pair, args.cross_encoder_name, args.max_evidence, args.nei_max_evidence) for doc in datain)
+    res = Parallel(n_jobs=args.n_jobs)(delayed(prepare_doc)(doc, args.db_path, args.sentence_pair, args.cross_encoder_name, args.max_evidence, args.nei_max_evidence, infile.parent.stem.split("-")[0]) for doc in datain)
     
     post_proc = []
     if args.sentence_pair:
