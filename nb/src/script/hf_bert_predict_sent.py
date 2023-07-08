@@ -14,9 +14,8 @@ from gen.util import read_data, write_jsonl
 
 if __name__ == "__main__":
     data_p = Path("/users/k21190024/study/fact-checking-repos/fever/baseline/dumps/bert-data-sent-evidence")
-    # data_p = list(data_p.glob("*dev*")) + list(data_p.glob("*test*"))
-    # data_p = [p for p in data_p if "fever-climatefever" not in p.stem]
-    data_p = [data_p / "scifact.all.test.n5.jsonl"]
+    data_p = list(data_p.glob("*dev*")) + list(data_p.glob("*test*"))
+    data_p = [p for p in data_p if "fever-climatefever" not in p.stem]
     
     model_p = list(Path("/users/k21190024/study/fact-checking-repos/fever/baseline/thesis/models/bert-base-uncased").glob("*sent*.out")) + list(Path("/users/k21190024/study/fact-checking-repos/fever/baseline/thesis/models/xlnet-base-cased").glob("*sent*.out"))
     out_p = Path("/users/k21190024/study/fact-checking-repos/fever/baseline/thesis/predictions/sent")
@@ -44,11 +43,14 @@ if __name__ == "__main__":
                 probas = [0,0,0]
                 for j in i:
                     probas[constants.LABEL2ID[j["label"]]] = j["score"]
-                post_preds.append({
+                res = {
                     "predicted_label": i[0]["label"], 
-                    "predicted_proba": probas, 
+                    "predicted_proba": probas,
                     "claim_id": d["claim_id"]
-                })
+                }
+                if "predicted_evidence" in d and d["predicted_evidence"] is not None:
+                    res["predicted_evidence"] = d["predicted_evidence"]
+                post_preds.append(res)
             
             write_jsonl(out_p / split[0] / pred_file_fmt.format(model_trained_on, model_type, split[1]), post_preds)
             

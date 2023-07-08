@@ -29,7 +29,7 @@ def run_sentence_retrieval(doc, db, ce):
                 page_ls.append(page)
                 ce_input.append([doc["claim"], elem[1]])
     scores = ce.predict(ce_input)
-    sents = sorted(list(zip(page_ls, sents_idx, scores)), key=lambda x: x[2], reverse=False)
+    sents = sorted(list(zip(page_ls, sents_idx, scores)), key=lambda x: x[2], reverse=True)
     
     return doc["id"], [[None, None, s[0], int(s[1])] for s in sents]
 
@@ -46,6 +46,7 @@ if __name__ == "__main__":
     parser.add_argument("--max-sentences", default=5, type=int, help="Number of sentences to retain")
     parser.add_argument("--skip-document-retrieval", action="store_true", help="Skip document retrieval, the input data must have 'predicted_pages' field.")
     parser.add_argument("--overwrite", action="store_true", help="Overwrite output file if it exist")
+    parser.add_argument("--pipeline-mode", action="store_true", help="Adds 'predicted_evidence' field")
     
     args = parser.parse_args()
     
@@ -75,15 +76,18 @@ if __name__ == "__main__":
         evidence = []
         for i, s in enumerate(sample[1]):
             evidence.append([s])
-        if doc["label"] == constants.LOOKUP["label"]["nei"]:
-            doc["evidence"] = deepcopy(evidence[:args.max_sentences])
-            doc["negative_evidence"] = deepcopy(evidence[args.max_sentences:])
+        if args.pipeline_mode:
+            doc["predicted_evidence"] = deepcopy(evidence[:args.max_sentences])
         else:
-            negatives = []
-            for ev, retr in zip(doc["evidence"], evidence):
-                if ev[0][2] != retr[0][2] or ev[0][3] != retr[0][3]:
-                    negatives.append(retr)
-            doc["negative_evidence"] = deepcopy(negatives)
+            if doc["label"] == constants.LOOKUP["label"]["nei"]:
+                doc["evidence"] = deepcopy(evidence[:args.max_sentences])
+                doc["negative_evidence"] = deepcopy(evidence[args.max_sentences:])
+            else:
+                negatives = []
+                for ev, retr in zip(doc["evidence"], evidence):
+                    if ev[0][2] != retr[0][2] or ev[0][3] != retr[0][3]:
+                        negatives.append(retr)
+                doc["negative_evidence"] = deepcopy(negatives)
             
     print("End NEI and negative sampling...")
     print(f"Writing file to {str(outfile)}")

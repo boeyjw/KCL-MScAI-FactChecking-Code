@@ -34,15 +34,23 @@ if __name__ == "__main__":
         for data in tqdm(data_p, total=len(data_p)):
             split = data.stem.split(".")
             
+            dataread = read_data(data)
             data_in = [{"text": doc["evidence"], "text_pair": doc["claim"]} for doc in read_data(data)]
             preds = pipe(data_in, padding=True) if "xlnet" in model_type else pipe(data_in, max_length=512, truncation="only_first", padding=True)
             
             post_preds = []
-            for i in preds:
+            for i, d in zip(preds, dataread):
                 probas = [0,0,0]
                 for j in i:
                     probas[constants.LABEL2ID[j["label"]]] = j["score"]
-                post_preds.append({"predicted_label": i[0]["label"], "predicted_proba": probas})
+                res = {
+                    "predicted_label": i[0]["label"], 
+                    "predicted_proba": probas,
+                    "claim_id": d["claim_id"]
+                }
+                if "predicted_evidence" in d and d["predicted_evidence"] is not None:
+                    res["predicted_evidence"] = d["predicted_evidence"]
+                post_preds.append(res)
             
             write_jsonl(out_p / split[0] / pred_file_fmt.format(model_trained_on, model_type, split[1]), post_preds)
             

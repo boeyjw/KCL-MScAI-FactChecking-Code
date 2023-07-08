@@ -15,7 +15,7 @@ class FEVERScorer:
     https://github.com/sheffieldnlp/naacl2018-fever/blob/add471f170fbd506bf12f3a778f945f55f3ef8db/src/scripts/score.py
     """
     
-    def __init__(self, actual_data, prediction_data, oracle_rte: bool = False, oracle_ir: bool = False, max_evidence: int = 5, score_name: str = ""):
+    def __init__(self, actual_data, prediction_data, oracle_rte: bool = False, oracle_ir: bool = False, max_evidence: int = 99999, score_name: str = "", max_pages: int = 99999):
         self._oracle_rte = oracle_rte
         self._oracle_ir = oracle_ir
         self._max_evidence = max_evidence
@@ -26,16 +26,18 @@ class FEVERScorer:
             _predicted_pages = [list(set([ev[0][2] for ev in doc["evidence"] if ev[0][2] is not None])) for doc in actual_data]
         else:
             if "predicted_sentences" in prediction_data[0]:
-                _predicted_sentences = [doc["predicted_sentences"] for doc in prediction_data]
+                _predicted_sentences = [doc["predicted_sentences"][:max_evidence] for doc in prediction_data]
             else:
-                _predicted_sentences = [doc["predicted_evidence"] for doc in prediction_data]
+                _predicted_sentences = [doc["predicted_evidence"][:max_evidence] for doc in prediction_data]
+            if isinstance(_predicted_sentences[0][0][0], list) and len(_predicted_sentences[0][0][0]) > 2:
+                _predicted_sentences = [[[ev[0][2], ev[0][3]] for ev in evidences] for evidences in _predicted_sentences]
 
             if "predicted_pages" in prediction_data[0]:
-                _predicted_pages = [list(set(doc["predicted_pages"])) for doc in prediction_data]
+                _predicted_pages = [list(set(doc["predicted_pages"]))[:max_pages] for doc in prediction_data]
             else:
                 _predicted_pages = []
                 for sents in _predicted_sentences:
-                    _predicted_pages.append(list(set([p[0] for p in sents])))
+                    _predicted_pages.append(list(set([p[0] for p in sents]))[:max_pages])
         
         if self._oracle_rte:
             _predicted_labels = [doc["label"] for doc in actual_data]
@@ -87,18 +89,18 @@ class FEVERScorer:
             Macro F1: {round(self.f1 * 100, 2)}
             """
     
-    def score_to_dict(self):
+    def score_to_dict(self, include_prefix: bool = True):
         doc_metric = self.get_document_metric()
-        key_prefix = "{0}_{1}" if len(self._score_name) > 0 else "{0}{1}"
+        key_prefix = "{0}_{1}" if len(self._score_name) > 0 and include_prefix else "{0}{1}"
         return {
-            key_prefix.format(self._score_name, "fever_score"): self.fever_score,
-            key_prefix.format(self._score_name, "evidence_accuracy"): self.accuracy,
-            key_prefix.format(self._score_name, "evidence_precision"): self.precision,
-            key_prefix.format(self._score_name, "evidence_recall"): self.recall,
-            key_prefix.format(self._score_name, "evidence_f1"): self.f1,
-            key_prefix.format(self._score_name, "document_precision"): doc_metric["precision"],
-            key_prefix.format(self._score_name, "document_recall"): doc_metric["recall"],
-            key_prefix.format(self._score_name, "document_f1"): doc_metric["f1"],
+            key_prefix.format(self._score_name if include_prefix else "", "fever_score"): self.fever_score,
+            key_prefix.format(self._score_name if include_prefix else "", "evidence_accuracy"): self.accuracy,
+            key_prefix.format(self._score_name if include_prefix else "", "evidence_precision"): self.precision,
+            key_prefix.format(self._score_name if include_prefix else "", "evidence_recall"): self.recall,
+            key_prefix.format(self._score_name if include_prefix else "", "evidence_f1"): self.f1,
+            key_prefix.format(self._score_name if include_prefix else "", "document_precision"): doc_metric["precision"],
+            key_prefix.format(self._score_name if include_prefix else "", "document_recall"): doc_metric["recall"],
+            key_prefix.format(self._score_name if include_prefix else "", "document_f1"): doc_metric["f1"],
         }
 
     def check_predicted_evidence_format(self, instance):
@@ -344,8 +346,8 @@ class ClimateFEVERScorer(FEVERScorer):
     Modify FEVER scorer such that NEI claims are also evaluated since Climate-FEVER provides
     actual NEI evidences
     """
-    def __init__(self, actual_data, prediction_data, oracle_rte: bool = False, oracle_ir: bool = False, max_evidence: int = 5, score_name: str = ""):
-        super().__init__(actual_data, prediction_data, oracle_rte, oracle_ir, max_evidence, score_name)
+    def __init__(self, actual_data, prediction_data, oracle_rte: bool = False, oracle_ir: bool = False, max_evidence: int = 99999, score_name: str = "", max_pages: int = 99999):
+        super().__init__(actual_data, prediction_data, oracle_rte, oracle_ir, max_evidence, score_name, max_pages)
         
     def is_strictly_correct(self, instance, max_evidence=None):
         #Strict evidence matching is only for NEI class
