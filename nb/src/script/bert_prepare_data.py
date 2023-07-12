@@ -13,27 +13,22 @@ def prepare_doc(doc, db_path, sentence_pair: bool, cross_encoder_name: str, max_
     db = FeverDocDB(db_path)
     sentences = []
     elab = []
-    sent_line = []
     predicted_evidence = []  # only use in pipeline mode
-    for i, ev in enumerate(doc["predicted_evidence"] if pipeline_mode else doc["evidence"]):
-        e = ev[0]
-        if e[2] is not None:
-            # handle duplicate evidence
-            sl = e[2] + str(e[3])
-            if sl in sent_line:
-                continue
-            else:
-                sent_line.append(sl)
-            lines = db.get_doc_lines(util.denormalise_title(e[2]))
-            if lines is not None:
-                for line in lines.split("\n"):
-                    l = line.split("\t")
-                    # handle dirty evidence lines in db
-                    if l[0].isdigit() and l[1].strip() and int(l[0]) == int(e[3]):
-                        sentences.append(util.normalise_title(l[1]))
-                        predicted_evidence.append([e[2], e[3]])
-                        if not pipeline_mode and "elab" in doc:
-                            elab.append(doc["elab"][i] if doc["elab"] else doc["label"])
+    for i, evidence in enumerate(doc["predicted_evidence"] if pipeline_mode else doc["evidence"]):
+        full_line = ""
+        for ev in evidence:
+            if ev[2] is not None:
+                lines = db.get_doc_lines(util.denormalise_title(ev[2]))
+                if lines is not None:
+                    for line in lines.split("\n"):
+                        l = line.split("\t")
+                        # handle dirty evidence lines in db
+                        if l[0].isdigit() and l[1].strip() and int(l[0]) == int(ev[3]):
+                            full_line += util.normalise_title(l[1] + " ")
+                            predicted_evidence.append([ev[2], ev[3]])
+        sentences.append(full_line.strip())
+        if not pipeline_mode and "elab" in doc:
+            elab.append(doc["elab"][i] if doc["elab"] else doc["label"])
     
     # limit number of evidences and retrieve only closest evidence to prevent major skew in target distribution
     if len(sentences) > max_evidence:

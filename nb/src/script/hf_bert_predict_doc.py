@@ -36,7 +36,7 @@ if __name__ == "__main__":
             
             dataread = read_data(data)
             data_in = [{"text": doc["evidence"], "text_pair": doc["claim"]} for doc in read_data(data)]
-            preds = pipe(data_in, padding=True) if "xlnet" in model_type else pipe(data_in, max_length=512, truncation="only_first", padding=True)
+            preds = pipe(data_in, max_length=1024 if "xlnet" in model_type else 512, truncation="only_first", padding=True)
             
             post_preds = []
             for i, d in zip(preds, dataread):

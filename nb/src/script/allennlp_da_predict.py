@@ -11,9 +11,8 @@ from scripts.rte.da.boey_eval_da import eval_model
 
 if __name__ == "__main__":
     data_p = Path("/users/k21190024/study/fact-checking-repos/fever/baseline/dumps/bert-data-doc-evidence")
-    # data_p = list(data_p.glob("*dev*")) + list(data_p.glob("*test*"))
-    # data_p = [p for p in data_p if "fever-climatefever" not in p.stem]
-    data_p = [data_p / "scifactpipeline.all.n6.s5.jsonl"]
+    data_p = list(data_p.glob("*dev*")) + list(data_p.glob("*test*"))
+    data_p = [p for p in data_p if "fever-climatefever" not in p.stem]
     
     model_p = Path("/users/k21190024/study/fact-checking-repos/fever/baseline/thesis/models/decomposable-attention").glob("*.out")
     out_p = Path("/users/k21190024/study/fact-checking-repos/fever/baseline/thesis/predictions/doc")
