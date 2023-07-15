@@ -24,9 +24,8 @@ def feverise_claims(data):
             label_ls, evi_ls = [], []
             for eid, es in doc["evidence"].items():
                 for i in es:
-                    for j in i["sentences"]:
-                        label_ls.append(sf_fever_label[i["label"]])
-                        evi_ls.append([[None, None, str(eid), j]])
+                    label_ls.append(sf_fever_label[i["label"]])
+                    evi_ls.append([[None, None, str(eid), j] for j in i["sentences"]])
             fdoc["elab"] = label_ls
             fdoc["evidence"] = evi_ls
             if sf_fever_label["CONTRADICT"] in label_ls:

@@ -22,9 +22,8 @@ def prepare_doc(doc, db_path, sentence_pair: bool, cross_encoder_name: str, max_
                 if lines is not None:
                     for line in lines.split("\n"):
                         l = line.split("\t")
-                        # handle dirty evidence lines in db
                         if l[0].isdigit() and l[1].strip() and int(l[0]) == int(ev[3]):
-                            full_line += util.normalise_title(l[1] + " ")
+                            full_line += util.normalise_title(l[1].strip() + " ")
                             predicted_evidence.append([ev[2], ev[3]])
         sentences.append(full_line.strip())
         if not pipeline_mode and "elab" in doc:

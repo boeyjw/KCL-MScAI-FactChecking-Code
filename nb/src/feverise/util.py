@@ -8,13 +8,16 @@ def replace_id_with_titleid(db_path, doc):
     
     evidences = doc["evidence"]
     titleid_evidences = []
-    for e in evidences:
-        if e[0][2] is not None:
-            cur.execute("SELECT id FROM documents WHERE original_id = ?", (e[0][2],))
-            res = cur.fetchone()[0]
-            titleid_evidences.append([[e[0][0], e[0][1], res, e[0][3]]])
-        else:
-            titleid_evidences.append([[None]*4])
+    for evidence in evidences:
+        ev_ls = []
+        for ev in evidence:
+            if ev[2] is not None:
+                cur.execute("SELECT id FROM documents WHERE original_id = ?", (ev[2],))
+                res = cur.fetchone()[0]
+                ev_ls.append([ev[0], ev[1], res, ev[3]])
+            else:
+                ev_ls.append([None]*4)
+        titleid_evidences.append(ev_ls)
     new_doc = deepcopy(doc)
     new_doc["evidence"] = titleid_evidences
     
@@ -22,13 +25,16 @@ def replace_id_with_titleid(db_path, doc):
         if doc["other_evidence"] is not None:
             other_evidences = doc["other_evidence"]
             other_titleid_evidences = []
-            for e in other_evidences:
-                if e[0][2] is not None:
-                    cur.execute("SELECT id FROM documents WHERE original_id = ?", (e[0][2],))
-                    res = cur.fetchone()[0]
-                    other_titleid_evidences.append([[e[0][0], e[0][1], res, e[0][3]]])
-                else:
-                    other_titleid_evidences.append(e[0])
+            for evidence in other_evidences:
+                ev_ls = []
+                for ev in evidence:
+                    if ev[2] is not None:
+                        cur.execute("SELECT id FROM documents WHERE original_id = ?", (ev[2],))
+                        res = cur.fetchone()[0]
+                        ev_ls.append([ev[0], ev[1], res, ev[3]])
+                    else:
+                        ev_ls.append([None]*4)
+                other_titleid_evidences.append(ev_ls)
         else:
             other_titleid_evidences = doc["other_evidence"]
         new_doc["other_evidence"] = other_titleid_evidences

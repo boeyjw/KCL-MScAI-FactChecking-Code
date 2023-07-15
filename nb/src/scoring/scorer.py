@@ -61,14 +61,10 @@ class FEVERScorer:
             actual_labels = [doc["label"] for doc in actual_data]
             self.classification_report = classification_report(y_true=actual_labels, y_pred=_predicted_labels, digits=4)
             self.classification_report_dict = classification_report(y_true=actual_labels, y_pred=_predicted_labels, output_dict=True)
-            mi_p, mi_r, mi_f, _ = precision_recall_fscore_support(y_true=actual_labels, y_pred=_predicted_labels, average="micro", beta=1.0)
             ma_p, ma_r, ma_f, _ = precision_recall_fscore_support(y_true=actual_labels, y_pred=_predicted_labels, average="macro", beta=1.0)
             self.rte_metrics = {
                 "fever_score": self.fever_score,
                 "accuracy": accuracy_score(y_true=actual_labels, y_pred=_predicted_labels),
-                "micro_precision": mi_p,
-                "micro_recall": mi_r,
-                "micro_f1": mi_f,
                 "macro_precision": ma_p,
                 "macro_recall": ma_r,
                 "macro_f1": ma_f,
