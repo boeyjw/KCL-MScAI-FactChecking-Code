@@ -7,14 +7,14 @@ from scipy.special import softmax
 
 ID2LABEL = {0: "SUPPORTS", 1: "NOT ENOUGH INFO", 2: "REFUTES"}
 
-def agg_predict_proba(proba):
+def agg_predict_proba(proba, return_proba=False):
     """
     Mean softmax probability across labels. Returns the label
     with the highest probability. If labels have equal probability,
     return the first one in the order of SUPPORTS, NOT ENOUGH INFO, REFUTES
     """
     probas = np.array([pr for pr in proba])
-    return np.argmax(probas.mean(axis=0))
+    return probas.mean(axis=0) if return_proba else np.argmax(probas.mean(axis=0))
 
 def agg_predict(preds):
     """
