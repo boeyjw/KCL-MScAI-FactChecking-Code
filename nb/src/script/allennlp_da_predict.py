@@ -16,7 +16,7 @@ if __name__ == "__main__":
     
     model_p = Path("/users/k21190024/study/fact-checking-repos/fever/baseline/thesis/models/decomposable-attention").glob("*.out")
     out_p = Path("/users/k21190024/study/fact-checking-repos/fever/baseline/thesis/predictions/doc")
-    # <model-trained-on>-<model-type>.[dev|test].jsonl
+    # <model-trained-on>-<model-type>.[dev|test|all].jsonl
     pred_file_fmt = "{0}-{1}.{2}.jsonl"
     
     for model in model_p:

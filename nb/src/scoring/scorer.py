@@ -6,7 +6,9 @@ from dataclasses  import dataclass
 
 import pandas as pd
 from matplotlib import pyplot as plt
-from sklearn.metrics import classification_report, precision_recall_fscore_support, accuracy_score
+from sklearn.metrics import classification_report, precision_recall_fscore_support, accuracy_score, confusion_matrix
+
+LABEL_ORDERED = ["SUPPORTS", "NOT ENOUGH INFO", "REFUTES"]
 
 class FEVERScorer:
     """
@@ -57,18 +59,23 @@ class FEVERScorer:
         
         self.classification_report = None
         self.rte_metrics = None
+        self.confusion_matrix = None
         if not oracle_rte:
             actual_labels = [doc["label"] for doc in actual_data]
             self.classification_report = classification_report(y_true=actual_labels, y_pred=_predicted_labels, digits=4)
             self.classification_report_dict = classification_report(y_true=actual_labels, y_pred=_predicted_labels, output_dict=True)
+            self.confusion_matrix = confusion_matrix(y_true=actual_labels, y_pred=_predicted_labels, labels=LABEL_ORDERED)
             ma_p, ma_r, ma_f, _ = precision_recall_fscore_support(y_true=actual_labels, y_pred=_predicted_labels, average="macro", beta=1.0)
+            mi_p, mi_r, mi_f, _ = precision_recall_fscore_support(y_true=actual_labels, y_pred=_predicted_labels, average="micro", beta=1.0)
             self.rte_metrics = {
                 "fever_score": self.fever_score,
                 "accuracy": accuracy_score(y_true=actual_labels, y_pred=_predicted_labels),
                 "macro_precision": ma_p,
                 "macro_recall": ma_r,
                 "macro_f1": ma_f,
-                
+                "micro_precision": mi_p,
+                "micro_recall": mi_r,
+                "micro_f1": mi_f,
             }
         
     def __str__(self):
@@ -516,6 +523,7 @@ class SentenceMicroScorer:
     classification_report: str
     classification_report_dict: dict
     rte_metrics: dict
+    confusion_matrix: list
     
     def print_report(self):
         print(self._score_name)
