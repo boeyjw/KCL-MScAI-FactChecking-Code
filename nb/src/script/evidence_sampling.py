@@ -35,7 +35,7 @@ def run_sentence_retrieval(doc, db, ce):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("Not Enough Info claim sampling using BM25 + Cross-Encoder")
+    parser = argparse.ArgumentParser("Evidence sampling using BM25 + Cross-Encoder")
     parser.add_argument("in_file", type=str, help="Input claim data path")
     parser.add_argument("out_file", type=str, help="Path to write sampled NEI data")
     parser.add_argument("db_path", type=str, help="Path to corpus index database")
