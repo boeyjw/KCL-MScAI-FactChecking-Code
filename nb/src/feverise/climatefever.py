@@ -108,7 +108,8 @@ def feverise_climatefever(data) -> tuple:
     
     Returns paper FEVER compliant claim-evidence pair (exclude DISPUTED claims), 
     assumed claim-evidence pair where DISPUTED claims are treated as NOT ENOUGH INFO
-    and corpus with ordered lines
+    and corpus with ordered lines. Disagreeing evidence labels are stored in 
+    "other_evidence".
     """
     def _add_evidences_to_claim(cdoc, doc, evidence_ls, label_ls, other_evidence_ls, other_label_ls):
         if cdoc is None:

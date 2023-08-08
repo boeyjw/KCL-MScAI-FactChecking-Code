@@ -14,11 +14,10 @@ import argparse
 import sqlite3
 import json
 import os
-import importlib.util
+import unicodedata
 
 from multiprocessing import Pool as ProcessPool
 from tqdm import tqdm
-from drqa.retriever import utils
 from rte.da.util_log_helper import LogHelper
 
 LogHelper.setup()
@@ -44,6 +43,9 @@ def iter_files(path):
 
 def get_contents(filename):
     """Parse the contents of a file. Each line is a JSON encoded document."""
+    def normalize(text):
+        """Resolve different type of unicode encodings."""
+        return unicodedata.normalize('NFD', text)
     documents = []
     with open(filename) as f:
         for line in f:
@@ -53,7 +55,7 @@ def get_contents(filename):
             if not doc:
                 continue
             # Add the document
-            documents.append((utils.normalize(doc['id']), doc['text'], doc['lines']))
+            documents.append((normalize(doc['id']), doc['text'], doc['lines']))
     return documents
 
 
@@ -91,7 +93,15 @@ def store_contents(data_path, save_path, num_workers=None):
 # ------------------------------------------------------------------------------
 # Main.
 # ------------------------------------------------------------------------------
+def run(data_path, save_path, num_workers):
+    save_dir = os.path.dirname(save_path)
+    if not os.path.exists(save_dir):
+        print("Save directory doesn't exist. Making {0}".format(save_dir))
+        os.makedirs(save_dir)
 
+    store_contents(
+        data_path, save_path, num_workers
+    )
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
