@@ -19,28 +19,10 @@ import importlib.util
 from multiprocessing import Pool as ProcessPool
 from tqdm import tqdm
 from drqa.retriever import utils
-from common.util.log_helper import LogHelper
+from rte.da.util_log_helper import LogHelper
 
 LogHelper.setup()
 logger = LogHelper.get_logger("DrQA BuildDB")
-
-# ------------------------------------------------------------------------------
-# Preprocessing Function.
-# ------------------------------------------------------------------------------
-
-PREPROCESS_FN = None
-def init(filename):
-    global PREPROCESS_FN
-    if filename:
-        PREPROCESS_FN = import_module(filename).preprocess
-
-
-def import_module(filename):
-    """Import a module given a full path to the file."""
-    spec = importlib.util.spec_from_file_location('doc_filter', filename)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
 
 
 # ------------------------------------------------------------------------------
@@ -62,15 +44,11 @@ def iter_files(path):
 
 def get_contents(filename):
     """Parse the contents of a file. Each line is a JSON encoded document."""
-    global PREPROCESS_FN
     documents = []
     with open(filename) as f:
         for line in f:
             # Parse document
             doc = json.loads(line)
-            # Maybe preprocess the document with custom function
-            if PREPROCESS_FN:
-                doc = PREPROCESS_FN(doc)
             # Skip if it is empty or None
             if not doc:
                 continue
@@ -79,15 +57,13 @@ def get_contents(filename):
     return documents
 
 
-def store_contents(data_path, save_path, preprocess, num_workers=None):
-    """Preprocess and store a corpus of documents in sqlite.
+def store_contents(data_path, save_path, num_workers=None):
+    """store a corpus of documents in sqlite.
 
     Args:
         data_path: Root path to directory (or directory of directories) of files
           containing json encoded documents (must have `id` and `text` fields).
         save_path: Path to output sqlite db.
-        preprocess: Path to file defining a custom `preprocess` function. Takes
-          in and outputs a structured doc.
         num_workers: Number of parallel processes to use when reading docs.
     """
     if os.path.isfile(save_path):
@@ -98,7 +74,7 @@ def store_contents(data_path, save_path, preprocess, num_workers=None):
     c = conn.cursor()
     c.execute("CREATE TABLE documents (id PRIMARY KEY, text, lines);")
 
-    workers = ProcessPool(num_workers, initializer=init, initargs=(preprocess,))
+    workers = ProcessPool(num_workers)
     files = [f for f in iter_files(data_path)]
     count = 0
     with tqdm(total=len(files)) as pbar:
@@ -121,10 +97,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('data_path', type=str, help='/path/to/data')
     parser.add_argument('save_path', type=str, help='/path/to/saved/db.db')
-    parser.add_argument('--preprocess', type=str, default=None,
-                        help=('File path to a python module that defines '
-                              'a `preprocess` function'))
-    parser.add_argument('--num-workers', type=int, default=None,
+    parser.add_argument('--num-workers', type=int, default=1,
                         help='Number of CPU processes (for tokenizing, etc)')
     args = parser.parse_args()
 
@@ -134,5 +107,5 @@ if __name__ == '__main__':
         os.makedirs(save_dir)
 
     store_contents(
-        args.data_path, args.save_path, args.preprocess, args.num_workers
+        args.data_path, args.save_path, args.num_workers
     )
