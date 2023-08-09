@@ -41,7 +41,7 @@ if __name__ == "__main__":
     parser.add_argument("db_path", type=str, help="Path to corpus index database")
     parser.add_argument("-p", "--n-jobs", type=int, default=1, help="Number of workers to run")
     parser.add_argument("-c", "--cross-encoder-name", type=str, default="cross-encoder/ms-marco-MiniLM-L-6-v2", help="SentenceTransformer Cross-Encoder to use for sentence retrieval.")
-    parser.add_argument("-i", "--pyserini-index-name", type=str, default="beir-v1.0.0-fever-flat", help="Pyserini index to use for document retrieval. Ignored if skip-document-retrieval flag is added.")
+    parser.add_argument("-i", "--pyserini-index-name", type=str, choices=["beir-v1.0.0-fever-flat", "beir-v1.0.0-scifact-flat"], default="beir-v1.0.0-fever-flat", help="Pyserini index to use for document retrieval. Choose from 'beir-v1.0.0-fever-flat', 'beir-v1.0.0-scifact-flat'. Ignored if skip-document-retrieval flag is added.")
     parser.add_argument("--max-pages", default=5, type=int, help="Number of pages to retain. Ignored if skip-document-retrieval flag is added.")
     parser.add_argument("--max-sentences", default=5, type=int, help="Number of sentences to retain")
     parser.add_argument("--skip-document-retrieval", action="store_true", help="Skip document retrieval, the input data must have 'predicted_pages' field.")
@@ -50,16 +50,18 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    infile = Path(args.in_file)
-    outfile = Path(args.out_file)
+    infile = Path(args.in_file).resolve()
+    outfile = Path(args.out_file).resolve()
     
     if outfile.exists() and not args.overwrite:
         raise FileExistsError(f"{args.out_file} exist! Use overwrite flag to replace this file.")
+    else:
+        outfile.parent.mkdir(exist_ok=True)
     
     doc_retr_path = ""
     if not args.skip_document_retrieval:
         print("Doing document retrieval...")
-        doc_retr_path = infile.parent / f"{infile.stem}.n{args.max_pages}.jsonl"
+        doc_retr_path = outfile.parent / f"{infile.stem}.n{args.max_pages}.jsonl"
         doc_retr = BM25DocumentRetriever(args.in_file, args.db_path, args.pyserini_index_name, args.max_pages, args.n_jobs)
         doc_retr.batch_document_retrieve()
         doc_retr.to_jsonl(doc_retr_path)
@@ -81,7 +83,7 @@ if __name__ == "__main__":
         else:
             if doc["label"] == constants.LOOKUP["label"]["nei"]:
                 doc["evidence"] = deepcopy(evidence[:args.max_sentences])
-                doc["negative_evidence"] = deepcopy(evidence[args.max_sentences:])
+                # doc["negative_evidence"] = deepcopy(evidence[args.max_sentences:])
             else:
                 negatives = []
                 for ev, retr in zip(doc["evidence"], evidence):

@@ -81,17 +81,23 @@ if __name__ == "__main__":
     parser.add_argument("--max-evidence", type=int, default=99999, help="Maximum number of evidence to use")
     parser.add_argument("--nei-max-evidence", type=int, default=99999, help="Maximum number of NEI claim-evidence to use")
     parser.add_argument("--pipeline-mode", action="store_true", help="Retrieve sentences for 'predicted_evidence' instead of 'evidence'")
+    parser.add_argument("--id-prefix", type=str, default=None, help="claim_id prefix string")
     
     args = parser.parse_args()
     
     infile = Path(args.in_file)
     outfile = Path(args.out_file)
     
+    if args.id_prefix is None:
+        id_prefix = infile.parent.stem.split("-")[0]
+    else:
+        id_prefix = args.id_prefix
+    
     print("Start processing...")
     datain = util.read_data(infile)
     res = Parallel(n_jobs=args.n_jobs)(delayed(prepare_doc)(
         doc, args.db_path, args.sentence_pair, args.cross_encoder_name, 
-        args.max_evidence, args.nei_max_evidence, infile.parent.stem.split("-")[0], 
+        args.max_evidence, args.nei_max_evidence, id_prefix, 
         args.pipeline_mode
     ) for doc in datain)
     
