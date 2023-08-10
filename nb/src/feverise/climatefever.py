@@ -115,14 +115,8 @@ def feverise_climatefever(data) -> tuple:
         if cdoc is None:
             return
         # add evidence and evidence labels
-        if doc["claim_label"] in ["NOT_ENOUGH_INFO", "DISPUTED"]:
-            # FEVER claims with NOT ENOUGH INFO do not have evidences
-            cdoc["evidence"] = [[[None]*4]]
-            if doc["claim_label"] == "DISPUTED" and "is_disputed" in cdoc:
-                cdoc["is_disputed"] = True
-        else:
-            cdoc["evidence"] = evidence_ls
-            cdoc["elab"] = label_ls
+        cdoc["evidence"] = evidence_ls
+        cdoc["elab"] = label_ls
 
         if other_evidence_ls:
             cdoc["other_evidence"] = other_evidence_ls
@@ -145,7 +139,7 @@ def feverise_climatefever(data) -> tuple:
             eid = "".join(eid_tokens[0:-1])  # evidence key
             sid = int(eid_tokens[-1])  # sentence index
             # claims section
-            if doc["claim_label"] not in ["NOT_ENOUGH_INFO", "DISPUTED"] and evidence["evidence_label"] == doc["claim_label"]:
+            if doc["claim_label"] not in ["DISPUTED"] and evidence["evidence_label"] == doc["claim_label"]:
                 evidence_ls.append([[None, None, eid, sid]])
                 label_ls.append(cf_fever_labels[evidence["evidence_label"]])
             else:

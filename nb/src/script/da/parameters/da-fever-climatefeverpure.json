@@ -19,15 +19,15 @@
       "end_tokens":["@@END@@"]
     }
   },
-  "train_data_path": "/users/k21190024/study/fact-checking-repos/fever/baseline/dumps/bert-data-doc-evidence/fever-climatefeverpure.train.n5.jsonl",
-  "validation_data_path": "/users/k21190024/study/fact-checking-repos/fever/baseline/dumps/bert-data-doc-evidence/fever-climatefeverpure.dev.n5.jsonl",
+  "train_data_path": "data/doc-dataset/fever-climatefeverpure.train.n5.jsonl",
+  "validation_data_path": "data/doc-dataset/fever-climatefeverpure.dev.n5.jsonl",
   "model": {
     "type": "decomposable_attention",
     "text_field_embedder": {
       "tokens": {
         "type": "embedding",
         "projection_dim": 200,
-        "pretrained_file": "/users/k21190024/study/fact-checking-repos/fever/baseline/fever2-sample/data/glove/glove.6B.300d.txt.gz",
+        "pretrained_file": "glove/glove.6B.300d.txt.gz",
         "embedding_dim": 300,
         "trainable": false
       }
