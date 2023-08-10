@@ -67,7 +67,7 @@ The AllenNLP environment must be recreated manually by first creating a new envi
 conda create -n daenv python=3.6 pip
 ```
 
-Then, each line in ```daenv.txt``` __must be installed using pip in order__. PyTorch can be installed using conda but it must be PyTorch 1.9.1.
+Then, each line in ```daenv.txt``` __must be installed using pip in order__. PyTorch can be installed using conda but it must be PyTorch 1.9.1. After creating the environment, copy adapted DA model file to AllenNLP library using command ```cp src/script/da/decomposable_attention.py /path/to/environment/lib/python3.6/site-packages/allennlp/models/```. This updates the model to track F1 macro and micro as well.
 
 ## 3. Run code
 ```bash
@@ -79,51 +79,51 @@ ROOT/
 │   └── 04_Model_Evaluation/
 ├── src/
 │   ├── __init__.py
-│   ├── constants.py
+│   ├── constants.py  # Constant variables
 │   ├── feverise/  # Preprocessing data to FEVER format
 │   │   ├── __init__.py
 │   │   ├── analysis.py
-│   │   ├── build_db.py
-│   │   ├── build_db_mod.py
-│   │   ├── climatefever.py
-│   │   ├── climatefever_sent.py
-│   │   ├── scifact.py
-│   │   └── util.py
+│   │   ├── build_db.py  # Build DrQA DB
+│   │   ├── build_db_mod.py  # Build DrQA DB but with title_id instead
+│   │   ├── climatefever.py  # Climate-FEVER Pure converter
+│   │   ├── climatefever_sent.py  # Climate-FEVER converter
+│   │   ├── scifact.py  # SciFact converter
+│   │   └── util.py  # id to title_id conversion
 │   ├── gen/  # General utility functions
 │   │   ├── __init__.py
-│   │   ├── special.py
-│   │   └── util.py
+│   │   ├── special.py  # Entropy calculation
+│   │   └── util.py  # General utilities
 │   ├── retrieval/  # Evidence retrieval code
 │   │   ├── __init__.py
-│   │   ├── doc_db.py
-│   │   ├── fever_doc_db.py
-│   │   └── retrieval.py
+│   │   ├── doc_db.py  # Borrowed DrQA document DB code
+│   │   ├── fever_doc_db.py  # Adapted doc_db code
+│   │   └── retrieval.py  # BM25 document and sentence retrieval
 │   ├── rte/  # RTE code
-│   │   ├── aggregate.py
-│   │   └── da/  # Borrowed DA code
+│   │   ├── aggregate.py  # Majority and mean probability aggregation
+│   │   └── da/  # Borrowed DA training and inference code
 │   │       ├── common_options.py
 │   │       ├── mod_reader.py
 │   │       ├── util_log_helper.py
 │   │       └── util_random.py
 │   ├── scoring/  # Evaluation object code
 │   │   ├── __init__.py
-│   │   ├── chart.py
-│   │   └── scorer.py
+│   │   ├── chart.py  # Plot DA fine-tuning charts
+│   │   └── scorer.py  # Adapted FEVER scoring object
 │   ├── script/  # Processing sripts
-│   │   ├── __init__.py
-│   │   ├── batch_prepare_docsent.sh
 │   │   ├── da/  # Specific DA scripts
-│   │   │   ├── batch_da_predict.py
-│   │   │   ├── decomposable_attention.py
-│   │   │   ├── mod_eval_da.py
-│   │   │   ├── mod_train_da.py
-│   │   │   ├── parameters/
-│   │   ├── evidence_sampling.py
-│   │   ├── hf_predict.py
-│   │   ├── prepare_docsent_data.py
-│   │   └── scifact_submission.py
-│   └── submission/  # Postprocess predictions to SciFact format
-│       └── scifact.py
+│   │   │   ├── batch_da_predict.py  # Batch DA inference
+│   │   │   ├── decomposable_attention.py  # Adapted AllenNLP code to include F1 metrics
+│   │   │   ├── mod_eval_da.py  # Adapted DA evaluation script
+│   │   │   ├── mod_train_da.py  # Adapted DA training script
+│   │   │   ├── parameters/  # Adapted DA hyperparameter files
+│   │   ├── __init__.py
+│   │   ├── batch_prepare_docsent.sh  # Batch NEI sampling, document and sentence preperation
+│   │   ├── evidence_sampling.py  # NEI sampling
+│   │   ├── hf_predict.py  # BERT and XLNet inference
+│   │   ├── prepare_docsent_data.py  # Prepare document and sentence data
+│   │   └── scifact_submission.py  # Convert predictions to SciFact format
+│   └── submission/
+│       └── scifact.py  # Postprocess predictions to SciFact format
 ```
 ### Preprocessing
 1. Build FEVER evidence corpus using command:
