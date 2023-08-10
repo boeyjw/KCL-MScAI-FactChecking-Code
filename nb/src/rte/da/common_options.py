@@ -1,3 +1,5 @@
+# Reference: https://github.com/sheffieldnlp/naacl2018-fever/blob/master/src/common/training/options.py
+
 import os
 import torch
 
